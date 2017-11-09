@@ -1,0 +1,29 @@
+<table style='line-height: 300%'>
+<tbody>
+<tr class="row1">
+  <td id="L4">L4</td>
+  <td></td>
+  <td id="L6">L6</td>
+  <td>HS</td>
+</tr>
+<tr class="row2">
+<td></td>
+<td id="L5">L5</td>
+<td></td>
+<td>HS</td>
+<td></td>
+</tr>
+<tr class="row3">
+<td></td>
+<td id="L2">L2</td>
+<td></td>
+<td>HS</td>
+</tr>
+<tr class="row4">
+<td id="L1">L1</td>
+<td></td>
+<td id="L3">L3</td>
+<td>HS</td>
+</tr>
+</tbody>
+</table> 

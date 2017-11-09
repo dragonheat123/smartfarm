@@ -1,18 +1,59 @@
-<script type="text/javascript">
-  var getdata = getHTTPObject();
-  
-var getdata = getHTTPObject();
-function getL1(){
-var urly = "http://things.ubidots.com/api/v1.6/devices/smart-farm-1/light-sensor-6/lv?token=A1E-oBMSdNRG2Z2lkXagXnf16Ho2Hwfond";
-getdata.open('GET', urly, true);
-getdata.send();
-getdata.onreadystatechange = function() {
-if (getdata.readyState == 4 && getdata.status == 200) {
-document.getElementById("disp").innerHTML = getdata.responseText;
-}}
-}
+var getdata1 = getHTTPObject();
+var getdata2 = getHTTPObject();
+var getdata3 = getHTTPObject();
+var getdata4 = getHTTPObject();
+var getdata5 = getHTTPObject();
+var getdata6 = getHTTPObject();
 
-  function getHTTPObject() {
+var urly = "https://things.ubidots.com/api/v1.6/devices/smart-farm-1/light-sensor-1/lv?token=A1E-oBMSdNRG2Z2lkXagXnf16Ho2Hwfond";
+getdata1.open('GET', urly, true);
+getdata1.send();
+getdata1.onreadystatechange = function() {
+if (getdata1.readyState == 4 && getdata1.status == 200) {
+document.getElementById("L1").innerHTML = getdata1.responseText;
+}}
+
+var urly = "https://things.ubidots.com/api/v1.6/devices/smart-farm-1/light-sensor-2/lv?token=A1E-oBMSdNRG2Z2lkXagXnf16Ho2Hwfond";
+getdata2.open('GET', urly, true);
+getdata2.send();
+getdata2.onreadystatechange = function() {
+if (getdata2.readyState == 4 && getdata2.status == 200) {
+document.getElementById("L2").innerHTML = getdata2.responseText;
+}}
+
+var urly = "https://things.ubidots.com/api/v1.6/devices/smart-farm-1/light-sensor-3/lv?token=A1E-oBMSdNRG2Z2lkXagXnf16Ho2Hwfond";
+getdata3.open('GET', urly, true);
+getdata3.send();
+getdata3.onreadystatechange = function() {
+if (getdata3.readyState == 4 && getdata3.status == 200) {
+document.getElementById("L3").innerHTML = getdata3.responseText;
+}}
+
+var urly = "https://things.ubidots.com/api/v1.6/devices/smart-farm-1/light-sensor-4/lv?token=A1E-oBMSdNRG2Z2lkXagXnf16Ho2Hwfond";
+getdata4.open('GET', urly, true);
+getdata4.send();
+getdata4.onreadystatechange = function() {
+if (getdata4.readyState == 4 && getdata4.status == 200) {
+document.getElementById("L4").innerHTML = getdata4.responseText;
+}}
+
+var urly = "https://things.ubidots.com/api/v1.6/devices/smart-farm-1/light-sensor-5/lv?token=A1E-oBMSdNRG2Z2lkXagXnf16Ho2Hwfond";
+getdata5.open('GET', urly, true);
+getdata5.send();
+getdata5.onreadystatechange = function() {
+if (getdata5.readyState == 4 && getdata5.status == 200) {
+document.getElementById("L5").innerHTML = getdata5.responseText;
+}}
+
+var urly = "https://things.ubidots.com/api/v1.6/devices/smart-farm-1/light-sensor-6/lv?token=A1E-oBMSdNRG2Z2lkXagXnf16Ho2Hwfond";
+getdata6.open('GET', urly, true);
+getdata6.send();
+getdata6.onreadystatechange = function() {
+if (getdata6.readyState == 4 && getdata6.status == 200) {
+document.getElementById("L6").innerHTML = getdata6.responseText;
+}}
+
+function getHTTPObject() {
 	var xhr = false;//set to false, so if it fails, do nothing
 	if(window.XMLHttpRequest) {//detect to see if browser allows this method
 		var xhr = new XMLHttpRequest();//set var the new request
@@ -29,6 +70,3 @@ document.getElementById("disp").innerHTML = getdata.responseText;
 	}
 	return xhr;//return the value of xhr
 }
- 
-  
-</script>
