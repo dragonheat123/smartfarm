@@ -1,0 +1,34 @@
+<script type="text/javascript">
+  var getdata = getHTTPObject();
+  
+var getdata = getHTTPObject();
+function getL1(){
+var urly = "http://things.ubidots.com/api/v1.6/devices/smart-farm-1/light-sensor-6/lv?token=A1E-oBMSdNRG2Z2lkXagXnf16Ho2Hwfond";
+getdata.open('GET', urly, true);
+getdata.send();
+getdata.onreadystatechange = function() {
+if (getdata.readyState == 4 && getdata.status == 200) {
+document.getElementById("disp").innerHTML = getdata.responseText;
+}}
+}
+
+  function getHTTPObject() {
+	var xhr = false;//set to false, so if it fails, do nothing
+	if(window.XMLHttpRequest) {//detect to see if browser allows this method
+		var xhr = new XMLHttpRequest();//set var the new request
+	} else if(window.ActiveXObject) {//detect to see if browser allows this method
+		try {
+			var xhr = new ActiveXObject("Msxml2.XMLHTTP");//try this method first
+		} catch(e) {//if it fails move onto the next
+			try {
+				var xhr = new ActiveXObject("Microsoft.XMLHTTP");//try this method next
+			} catch(e) {//if that also fails return false.
+				xhr = false;
+			}
+		}
+	}
+	return xhr;//return the value of xhr
+}
+ 
+  
+</script>
