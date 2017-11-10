@@ -22,7 +22,7 @@ def uploadimg():
         print("Uploading to Dropbop...")
         try:
             dbx.files_upload(f.read(), dbpath, mode=WriteMode('overwrite'))
-        except ApiError as err:
+        except ApiError as err:file:///G:/10112017.py
             # This checks for the specific error where a user doesn't have
             # enough Dropbox space quota to upload this file
             if (err.error.is_path() and
@@ -36,3 +36,14 @@ def uploadimg():
                 sys.exit()
                 
 uploadimg()
+
+
+a = 0
+
+while a<10:
+    try:
+        a+=1
+        print(a)
+    except a>4:
+        print('kjh')
+        
