@@ -9,6 +9,7 @@ import smbus
 import time
 
 tlastread=0
+
 bus=smbus.SMBus(1)
 
 def readtemp():

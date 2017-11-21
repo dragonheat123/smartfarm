@@ -2,7 +2,7 @@
 """
 Created on Fri Nov  3 11:08:48 2017
 
-@author: Brian~clem's edit
+@author: Brian
 """
 
 # -*- coding: utf-8 -*-
@@ -23,30 +23,18 @@ from hx711 import HX711
 import Adafruit_DHT
 import http.client 
 import json
+import dropbox
+from dropbox.files import WriteMode
+from dropbox.exceptions import ApiError, AuthError
+import sys
+import picamera
 
 ###INITIALIZE VARIABLES FOR DATA UPLOAD
 d = {}
-#d["avg-blue-ppfd"] = 0
-#d["avg-red-ppfd"] = 0
-#d["blue-led-level"] = 0                 ###send the calculated value for blue avg ppfd
-#d["red-led-level"] = 0                      ###send the calculated value for avg red ppfd
-#d["humidity"] = 0
-#d["temperature"] = 0
-#d["leaf-area-1"] = 0
-#d["leaf-area-2"] = 0
-#d["light-sensor-1"] = 0                 ##sensor position not decided --> planned to draw a colored html table to show light intensity
-#d["light-sensor-2"] = 0
-#d["light-sensor-3"] = 0
-#d["light-sensor-4"] = 0
-#d["light-sensor-5"] = 0
-#d["light-sensor-6"] = 0
-#d["manual-overide"] = 0                 ##update this back to zero after manual overide is triggered and changes to led level and cycle implemented
-#d["pot-1-weight"] = 0                   ###averaged pot weight
-#d["pot-2-weight"] = 0
-#d["pot-3-weight"] = 0
-#d["soil-moisture-1"] = 0
-#d["soil-moisture-2"] = 0
-#d["soil-moisture-3"] = 0 
+dbx = dropbox.Dropbox("-maRW30I7sAAAAAAAAAAC6tQJp7TB2pp7-qZQ9mijGMPqhE4F48G3eMslstwzbZo")
+imagepath = '/home/pi/Desktop/now.jpg'
+dbpath1 = '/'+str(round(time.time()))+'.jpg'
+dbpath2 = '/now.jpg'
 
 def getData():
     conn = http.client.HTTPConnection("things.ubidots.com", 80, timeout=60)
@@ -107,6 +95,24 @@ def sendUpdateConfirmation():
     r1= conn.getresponse()
     print('sending update ', r1.status, r1.reason)
     conn.close()
+
+def uploading(dbpath):
+    with open(imagepath, 'rb') as f:
+        print("Uploading to Dropbox...")
+        try:
+            dbx.files_upload(f.read(), dbpath, mode=WriteMode('overwrite'))
+        except ApiError as err:
+            # This checks for the specific error where a user doesn't have
+            # enough Dropbox space quota to upload this file
+            if (err.error.is_path() and
+                    err.error.get_path().error.is_insufficient_space()):
+                sys.exit("ERROR: Cannot back up; insufficient space.")
+            elif err.user_message_text:
+                print(err.user_message_text)
+                sys.exit()
+            else:
+                print(err)
+                sys.exit()
 #    
 #def deleteValues(id):
 #    conn = http.client.HTTPConnection("things.ubidots.com", 80, timeout=60)
@@ -392,6 +398,7 @@ GPIO.output(16,0)
 ############################# define variables
 tlastread=0
 tlastcheck=0
+tlastpic = 0
 tlastsend = 0
 ppfdred0, ppfdblue0, ppfd0 = 0,0,0
 ppfdred1, ppfdblue1, ppfd1 = 0,0,0
@@ -431,16 +438,34 @@ while 1:
         sendUpdateConfirmation()
         manual_overide = 0
     
-    if time.time()-tlastread > 15*60:
+    if time.time()-tlastread > 5*60:
         try:
             ms0,ms1,ms2,ms3,ms4,ms5,avg_basin1,avg_basin2,avg_basin3 = monitoring()    #Returns 8 values, moistsensor0,moistsensor1,moistsensor2,.....
-            
-            ppfdred0, ppfdblue0, ppfd0 = sel_light(0,0,0,0)  #~Returns 4 output each red0,blue0,green0,PPFD0  -->need to map from out data from excel
-            ppfdred1, ppfdblue1, ppfd1 = sel_light(0,0,0,1)  
-            ppfdred2, ppfdblue2, ppfd2 = sel_light(0,0,1,0)
-            ppfdred3, ppfdblue3, ppfd3 = sel_light(0,0,1,1)
-            ppfdred4, ppfdblue4, ppfd4 = sel_light(0,1,0,0)
-            ppfdred5, ppfdblue5, ppfd5 = sel_light(0,1,0,1)
+            try:
+                ppfdred0, ppfdblue0, ppfd0 = sel_light(0,0,0,0)  #~Returns 4 output each red0,blue0,green0,PPFD0  -->need to map from out data from excel
+            except:
+                ppfdred0, ppfdblue0, ppfd0 = None, None, None
+            try:    
+                ppfdred1, ppfdblue1, ppfd1 = sel_light(0,0,0,1)  
+            except:
+                ppfdred1, ppfdblue1, ppfd1 = None, None, None
+            try:
+                ppfdred2, ppfdblue2, ppfd2 = sel_light(0,0,1,0)
+            except:
+                ppfdred2, ppfdblue2, ppfd2 = None, None, None
+            try:    
+                ppfdred3, ppfdblue3, ppfd3 = sel_light(0,0,1,1)
+            except:
+                ppfdred3, ppfdblue3, ppfd3 = None, None, None
+            try:
+                ppfdred4, ppfdblue4, ppfd4 = sel_light(0,1,0,0)
+            except:
+                ppfdred4, ppfdblue4, ppfd4 = None, None, None
+            try:
+                ppfdred5, ppfdblue5, ppfd5 = sel_light(0,1,0,1)
+            except:
+                ppfdred5, ppfdblue5, ppfd5 = None, None, None
+
             now = datetime.datetime.now()
             temp,humd = getDHTreading() #returns temperature and humidity
 #           getweight()   #returns val1 and val2 for 2 load cell
@@ -458,10 +483,11 @@ while 1:
                 file.write(data)
                 file.close()
                 
-                print ("ok")
+                print ("file written")
                 tlastread = time.time()
         except OSError:
             print ("OSError Occurred")
+            tlastread = time.time()
             pass
             
     
@@ -501,28 +527,55 @@ while 1:
         lightingr.start(100) #Duty Cycle turn down light
         lightingb.start(100) 
     
-    if time.time() - tlastsend > 15*60:   
+    if time.time() - tlastsend > 5*60:   
         ### insert measurements
         
         ##fill in data dictionary
-        
-        d["avg-blue-ppfd"] = np.mean([ppfdblue0,ppfdblue1,ppfdblue2,ppfdblue3,ppfdblue4,ppfdblue5])
-        d["avg-red-ppfd"] = np.mean([ppfdred0,ppfdred1,ppfdred2,ppfdred3,ppfdred4,ppfdred5])
+        if ppfdblue0 != None and ppfdblue1 != None and ppfdblue2 != None and ppfdblue3 != None and ppfdblue4 != None and ppfdblue5!= None:
+            d["avg-blue-ppfd"] = np.mean([ppfdblue0,ppfdblue1,ppfdblue2,ppfdblue3,ppfdblue4,ppfdblue5])
+        if ppfdred0 != None and ppfdred1 != None and ppfdred2 != None and ppfdred3 != None and ppfdred4 != None and ppfdred5!= None:
+            d["avg-red-ppfd"] = np.mean([ppfdred0,ppfdred1,ppfdred2,ppfdred3,ppfdred4,ppfdred5])
         d["humidity"] = humd
         d["temperature"] = temp
-        d["light-sensor-1"] = ppfd4                 ##sensor position not decided --> planned to draw a colored html table to show light intensity
-        d["light-sensor-2"] = ppfd1
-        d["light-sensor-3"] = ppfd3
-        d["light-sensor-4"] = ppfd5
-        d["light-sensor-5"] = ppfd2
-        d["light-sensor-6"] = ppfd0
+        if ppfd4 != None:
+            d["light-sensor-1"] = ppfd4                 ##sensor position not decided --> planned to draw a colored html table to show light intensity
+        if ppfd1 != None:
+            d["light-sensor-2"] = ppfd1
+        if ppfd3 != None:
+            d["light-sensor-3"] = ppfd3
+        if ppfd5 != None:
+            d["light-sensor-4"] = ppfd5
+        if ppfd2 != None:
+            d["light-sensor-5"] = ppfd2
+        if ppfd0 != None:
+            d["light-sensor-6"] = ppfd0
         d["soil-moisture-1"] = avg_basin1
         d["soil-moisture-2"] = avg_basin2
-        d["soil-moisture-3"] = avg_basin3     
-    
-        sendData()
+        d["soil-moisture-3"] = avg_basin3
+        try:
+            sendData()
+        except:
+            print("senddata failed")
+            pass
+        print('data sent')
         tlastsend = time.time()
 
+    if time.time()- tlastpic >5*60 :
+        cam = picamera.PiCamera()
+        cam.resolution = (640,480)
+        cam.capture("/home/pi/Desktop/now.jpg")
+        cam.close()
+        dbpath1 = '/'+str(round(time.time()))+'.jpg'
+        try:
+            uploading(dbpath1)
+            uploading(dbpath2)
+        except:
+            print("upload failed")
+            pass
+        print("upload done")
+        tlastpic = time.time()
+        
+        
 
         
 

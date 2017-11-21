@@ -14,7 +14,7 @@ import json
 
 def deleteValues(id):
     conn = http.client.HTTPConnection("things.ubidots.com", 80, timeout=60)
-    conn.request("DELETE", "/api/v1.6/variables/"+str(id)+"/values/0/"+str(round(time.time())*1000)+"/?token=A1E-oBMSdNRG2Z2lkXagXnf16Ho2Hwfond")
+    conn.request("DELETE", "/api/v1.6/variables/"+str(id)+"/values/1509494400000/1509465600000/?token=A1E-oBMSdNRG2Z2lkXagXnf16Ho2Hwfond")
     r1 = conn.getresponse()
     print(r1.status, r1.reason)
     
